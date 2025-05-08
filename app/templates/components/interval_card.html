@@ -1,0 +1,33 @@
+<!-- Interval card component -->
+<!-- Reusable interval card component -->
+<div class="card h-100 border-primary shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">{{ interval | upper }} INTERVAL</h5>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <h6 class="text-success mb-2">
+                <i class="bi bi-arrow-up-circle"></i> RSI &lt; 30 (Underbought)
+            </h6>
+            <p class="mb-0">
+                {% if underbought %}
+                    {{ underbought|join(', ') }}
+                {% else %}
+                    None
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <h6 class="text-danger mb-2">
+                <i class="bi bi-arrow-down-circle"></i> RSI &gt; 70 (Overbought)
+            </h6>
+            <p class="mb-0">
+                {% if overbought %}
+                    {{ overbought|join(', ') }}
+                {% else %}
+                    None
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>

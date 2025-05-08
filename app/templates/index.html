@@ -1,0 +1,193 @@
+<!-- Main page -->
+{% extends "base.html" %}
+
+{% block title %}RSI Forex Screener{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-filter-square"></i> RSI Screener for FOREX Pairs
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5><i class="bi bi-clock"></i> Choose your intervals to combine:</h5>
+                    <div class="row mt-3">
+                        {% for interval in intervals %}
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input interval-checkbox" type="checkbox" id="interval-{{ interval }}" data-interval="{{ interval }}">
+                                <label class="form-check-label" for="interval-{{ interval }}">
+                                    Show {{ interval.upper() }} Interval
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div id="loading" class="text-center my-5 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Fetching forex data...</p>
+                </div>
+                
+                <div id="results-container" class="d-none">
+                    <hr>
+                    <div class="row" id="interval-results">
+                        <!-- Interval results will be displayed here -->
+                    </div>
+                    
+                    <div id="combined-results" class="mt-4 d-none">
+                        <!-- Combined results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="no-selection" class="text-center my-5">
+                    <i class="bi bi-arrow-up-circle text-muted" style="font-size: 3rem;"></i>
+                    <p class="mt-2 text-muted">Select at least one interval to see results</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.interval-checkbox');
+        const resultsContainer = document.getElementById('results-container');
+        const loadingIndicator = document.getElementById('loading');
+        const noSelectionMessage = document.getElementById('no-selection');
+        const intervalResultsContainer = document.getElementById('interval-results');
+        const combinedResultsContainer = document.getElementById('combined-results');
+        
+        // Add event listeners to checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', fetchResults);
+        });
+        
+        function fetchResults() {
+            // Get selected intervals
+            const selectedIntervals = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.dataset.interval);
+            
+            if (selectedIntervals.length === 0) {
+                // No intervals selected
+                resultsContainer.classList.add('d-none');
+                noSelectionMessage.classList.remove('d-none');
+                return;
+            }
+            
+            // Show loading indicator
+            resultsContainer.classList.add('d-none');
+            noSelectionMessage.classList.add('d-none');
+            loadingIndicator.classList.remove('d-none');
+            
+            // Fetch data from API
+            fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ intervals: selectedIntervals })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResults(data.data, selectedIntervals);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching data.');
+            })
+            .finally(() => {
+                loadingIndicator.classList.add('d-none');
+                resultsContainer.classList.remove('d-none');
+            });
+        }
+        
+        function displayResults(data, selectedIntervals) {
+            // Clear previous results
+            intervalResultsContainer.innerHTML = '';
+            
+            // Display individual interval results
+            selectedIntervals.forEach(interval => {
+                const underbought = data[interval][0];
+                const overbought = data[interval][1];
+                
+                const intervalCard = document.createElement('div');
+                intervalCard.className = 'col-lg-' + (12 / selectedIntervals.length) + ' col-md-6 mb-4';
+                intervalCard.innerHTML = `
+                    <div class="card h-100 border-primary shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">${interval.toUpperCase()} INTERVAL</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6 class="text-success mb-2">
+                                    <i class="bi bi-arrow-up-circle"></i> RSI &lt; 30 (Underbought)
+                                </h6>
+                                <p class="mb-0">${underbought.length > 0 ? underbought.join(', ') : 'None'}</p>
+                            </div>
+                            <div>
+                                <h6 class="text-danger mb-2">
+                                    <i class="bi bi-arrow-down-circle"></i> RSI &gt; 70 (Overbought)
+                                </h6>
+                                <p class="mb-0">${overbought.length > 0 ? overbought.join(', ') : 'None'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                intervalResultsContainer.appendChild(intervalCard);
+            });
+            
+            // Display combined results if multiple intervals are selected
+            if (selectedIntervals.length > 1) {
+                const combinedUnderbought = data.combined[0];
+                const combinedOverbought = data.combined[1];
+                
+                combinedResultsContainer.innerHTML = `
+                    <div class="card border-success shadow">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-intersect"></i> COMBINED RESULTS
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <h6 class="text-success mb-2">
+                                        <i class="bi bi-arrow-up-circle"></i> RSI &lt; 30 (Underbought)
+                                    </h6>
+                                    <p class="mb-0">${combinedUnderbought.length > 0 ? combinedUnderbought.join(', ') : 'None'}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-danger mb-2">
+                                        <i class="bi bi-arrow-down-circle"></i> RSI &gt; 70 (Overbought)
+                                    </h6>
+                                    <p class="mb-0">${combinedOverbought.length > 0 ? combinedOverbought.join(', ') : 'None'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                combinedResultsContainer.classList.remove('d-none');
+            } else {
+                combinedResultsContainer.classList.add('d-none');
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,281 @@
+/* Custom styles */
+/* Dark theme for Forex RSI Screener */
+
+:root {
+    --primary-color: #3b82f6;
+    --primary-dark: #2563eb;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --info-color: #60a5fa;
+    --light-color: #374151;
+    --dark-color: #111827;
+    --gray-color: #9ca3af;
+    
+    /* Dark theme specific colors */
+    --bg-dark: #0f172a;
+    --bg-card: #1e293b;
+    --text-primary: #f3f4f6;
+    --text-secondary: #d1d5db;
+    --border-color: #334155;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+}
+
+/* Navbar customization */
+.navbar {
+    background-color: var(--bg-card) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand {
+    color: var(--text-primary) !important;
+}
+
+.navbar-brand i {
+    margin-right: 8px;
+    color: var(--primary-color);
+}
+
+/* Card customization */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+    color: var(--text-secondary);
+}
+
+/* Form controls */
+.form-control, .form-select {
+    background-color: #2d3748;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #2d3748;
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+}
+
+.form-check-input {
+    background-color: #2d3748;
+    border-color: var(--gray-color);
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-switch .form-check-input {
+    height: 1.5em;
+    width: 3em;
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+/* Forex pair display */
+.card h6 {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+}
+
+.card h6 i {
+    margin-right: 8px;
+    color: var(--primary-color);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
+/* Footer styles */
+.footer {
+    background-color: var(--bg-card);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    color: var(--text-secondary);
+}
+
+/* Loading spinner */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    color: var(--primary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 20px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2d3748;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+/* Table styling */
+.table {
+    color: var(--text-secondary);
+}
+
+.table-dark {
+    background-color: var(--bg-card);
+}
+
+.table th {
+    border-color: var(--border-color);
+}
+
+.table td {
+    border-color: var(--border-color);
+}
+
+/* Badge colors */
+.badge.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--warning-color) !important;
+    color: var(--dark-color);
+}
+
+.badge.bg-info {
+    background-color: var(--info-color) !important;
+}
+
+/* Modal styling */
+.modal-content {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+.modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+.modal-footer {
+    border-top-color: var(--border-color);
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+.dropdown-item {
+    color: var(--text-secondary);
+}
+
+.dropdown-item:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--text-primary);
+}
+
+/* Alert styling */
+.alert {
+    border: 1px solid transparent;
+}
+
+.alert-primary {
+    background-color: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+}
+
+.alert-success {
+    background-color: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+.alert-danger {
+    background-color: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+
+.alert-warning {
+    background-color: rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #fcd34d;
+}

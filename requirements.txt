@@ -1,0 +1,8 @@
+# Project dependencies
+Flask==2.3.3
+Flask-Caching==2.0.2
+pandas==2.0.3
+yfinance==0.2.59
+ta==0.11.0
+gunicorn==21.2.0
+python-dotenv==1.0.0
