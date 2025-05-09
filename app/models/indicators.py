@@ -31,7 +31,6 @@ def calculate_rsi(data, period=None, overbought=None, underbought=None):
         df['indication'] = 'Normal'
         df.loc[df['RSI'] > overbought, 'indication'] = 'Overbought'
         df.loc[df['RSI'] < underbought, 'indication'] = 'Underbought'
-        print("calculated")
 
         return df
 
