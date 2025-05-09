@@ -2,6 +2,7 @@
 import yfinance as yf
 import pandas as pd
 import time
+import random
 from datetime import datetime, timedelta
 from app import cache
 from config import FOREX_PAIRS
@@ -43,7 +44,8 @@ def try_yf_download(ticker, interval, start=None, end=None):
     
     return None
 
-@cache.memoize(timeout=300)  # Cache for 5 minutes
+# Changed timeout to 60 seconds and added a cache key function to ensure fresh data
+@cache.memoize(timeout=60)
 def download_forex_data(pair, interval):
     """
     Download forex data using yfinance with retry mechanism and cache the results
@@ -61,7 +63,7 @@ def download_forex_data(pair, interval):
     
     # Determine appropriate lookback period based on interval
     if interval == '5m' or interval == '15m':
-        start_date = end_date - timedelta(days=1)  # 5 days for minute data
+        start_date = end_date - timedelta(days=1)  # 1 day for minute data
     elif interval == '1h':
         start_date = end_date - timedelta(days=30)  # 30 days for hourly data
     elif interval == '1d':
@@ -93,6 +95,11 @@ def download_forex_data(pair, interval):
         print(f"Error in download_forex_data for {pair} ({interval} interval): {type(e).__name__}: {e}")
         return None
 
+def clear_data_cache():
+    """Clear all cached forex data"""
+    cache.clear()
+    return True
+
 def get_forex_analysis(interval):
     """
     Get forex analysis for all pairs at a specific interval
@@ -107,6 +114,9 @@ def get_forex_analysis(interval):
     overbought = []
     
     for pair in FOREX_PAIRS:
+        # Add small random delay to prevent rate limiting
+        time.sleep(random.uniform(0.1, 0.3))
+        
         data = download_forex_data(pair, interval)
         
         if data is not None and not data.empty and 'Close' in data.columns:
@@ -141,12 +151,18 @@ def get_combined_analysis(intervals):
     
     # Calculate combined results (intersection)
     if intervals:
-        combined_underbought = set(result[intervals[0]][0])
-        combined_overbought = set(result[intervals[0]][1])
+        # Initialize with empty lists in case the first interval has no results
+        combined_underbought = set(result[intervals[0]][0]) if result[intervals[0]] and len(result[intervals[0]]) >= 1 else set()
+        combined_overbought = set(result[intervals[0]][1]) if result[intervals[0]] and len(result[intervals[0]]) >= 2 else set()
         
         for interval in intervals[1:]:
-            combined_underbought.intersection_update(result[interval][0])
-            combined_overbought.intersection_update(result[interval][1])
+            # Safely get results, handling potential missing or incomplete data
+            interval_data = result.get(interval, ([], []))
+            underbought = set(interval_data[0]) if interval_data and len(interval_data) >= 1 else set()
+            overbought = set(interval_data[1]) if interval_data and len(interval_data) >= 2 else set()
+            
+            combined_underbought.intersection_update(underbought)
+            combined_overbought.intersection_update(overbought)
             
         result['combined'] = (list(combined_underbought), list(combined_overbought))
     

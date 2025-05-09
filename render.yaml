@@ -1,0 +1,16 @@
+# render.yaml - Place this file in the root of your project
+services:
+  - type: web
+    name: forex-rsi-screener
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: DISABLE_COLLECTSTATIC
+        value: 1
+      - key: WEB_CONCURRENCY
+        value: 4
+    healthCheckPath: /
+    autoDeploy: false  # Set to true for automatic deployments

@@ -1,33 +1,39 @@
-# Technical indicators calculation
 import pandas as pd
-import ta
+from ta.momentum import RSIIndicator
+from config import RSI_PERIOD, RSI_OVERBOUGHT, RSI_UNDERBOUGHT
 
-def calculate_rsi(df, window=14):
+def calculate_rsi(data, period=None, overbought=None, underbought=None):
     """
-    Calculate RSI indicator and determine market condition (Overbought/Underbought/Neutral)
-    
-    Args:
-        df (pandas.DataFrame): DataFrame with price data including 'Close' column
-        window (int): RSI window period (default: 14)
-        
-    Returns:
-        pandas.DataFrame: Original DataFrame with added RSI and indication columns
+    Calculate RSI (Relative Strength Index) using ta library.
     """
-    if df is None or df.empty or 'Close' not in df.columns:
+    # Use default values from config if not provided
+    period = period or RSI_PERIOD
+    overbought = overbought or RSI_OVERBOUGHT
+    underbought = underbought or RSI_UNDERBOUGHT
+
+    try:
+        df = data.copy()
+
+        if 'Close' not in df.columns:
+            print("Error: Close price column not found in data")
+            return pd.DataFrame()
+
+        # Ensure 'Close' is a 1D Series
+        close_series = df['Close']
+        if isinstance(close_series, pd.DataFrame):
+            close_series = close_series.squeeze()
+
+        # Calculate RSI
+        rsi_indicator = RSIIndicator(close=close_series, window=period)
+        df['RSI'] = rsi_indicator.rsi()
+
+        # Add RSI signal
+        df['indication'] = 'Normal'
+        df.loc[df['RSI'] > overbought, 'indication'] = 'Overbought'
+        df.loc[df['RSI'] < underbought, 'indication'] = 'Underbought'
+
         return df
 
-    # Calculate RSI using the TA library
-    close_prices = df['Close'].squeeze()
-    rsi_series = ta.momentum.RSIIndicator(close_prices, window=window).rsi()
-    df['RSI'] = rsi_series.squeeze()
-    
-    # Drop NaN values
-    df.dropna(inplace=True)
-    
-    # Determine market condition based on RSI values
-    df['indication'] = ''
-    df.loc[df['RSI'] > 70, 'indication'] = 'Overbought'
-    df.loc[df['RSI'] < 30, 'indication'] = 'Underbought'
-    df.loc[(df['RSI'] >= 30) & (df['RSI'] <= 70), 'indication'] = 'Neutral'
-    
-    return df
+    except Exception as e:
+        print(f"Error calculating RSI: {type(e).__name__}: {e}")
+        return pd.DataFrame()
