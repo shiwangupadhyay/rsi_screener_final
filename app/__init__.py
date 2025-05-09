@@ -10,7 +10,7 @@ cache = Cache(config={
 
 def create_app():
     """Create and configure the Flask application"""
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static', template_folder='templates')
     
     # Configure the app
     app.config.from_object('config')
