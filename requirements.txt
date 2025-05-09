@@ -3,6 +3,6 @@ Flask==2.3.3
 Flask-Caching==2.0.2
 pandas
 yfinance==0.2.59
-ta==0.11.0
+ta
 gunicorn==21.2.0
 python-dotenv==1.0.0
