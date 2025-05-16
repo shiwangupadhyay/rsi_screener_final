@@ -1,4 +1,3 @@
-# Data fetching and processing
 import yfinance as yf
 import pandas as pd
 import time
@@ -21,8 +20,8 @@ def try_yf_download(ticker, interval, start=None, end=None):
     Returns:
         pandas.DataFrame or None: DataFrame with price data or None if download failed
     """
-    max_retries = 3  # Number of retry attempts
-    retry_delay = 5  # Seconds to wait between retries
+    max_retries = 3 
+    retry_delay = 5 
     
     for attempt in range(max_retries):
         try:
@@ -31,12 +30,12 @@ def try_yf_download(ticker, interval, start=None, end=None):
             if not df.empty and 'Close' in df.columns:
                 return df
                 
-            if attempt < max_retries - 1:  # Don't sleep on the last attempt
+            if attempt < max_retries - 1:  
                 print(f"Empty dataframe for {ticker}, retrying in {retry_delay} seconds... (Attempt {attempt+1}/{max_retries})")
                 time.sleep(retry_delay)
                 
         except Exception as e:
-            if attempt < max_retries - 1:  # Don't sleep on the last attempt
+            if attempt < max_retries - 1:  
                 print(f"Error downloading {ticker}, retrying in {retry_delay} seconds... (Attempt {attempt+1}/{max_retries}): {type(e).__name__}: {e}")
                 time.sleep(retry_delay)
             else:
@@ -44,7 +43,6 @@ def try_yf_download(ticker, interval, start=None, end=None):
     
     return None
 
-# Changed timeout to 60 seconds and added a cache key function to ensure fresh data
 @cache.memoize(timeout=60)
 def download_forex_data(pair, interval):
     """
@@ -58,32 +56,30 @@ def download_forex_data(pair, interval):
     Returns:
         pandas.DataFrame or None: DataFrame with price data or None if download failed
     """
-    # Calculate start and end dates based on interval
+   
     end_date = datetime.now()
     
-    # Determine appropriate lookback period based on interval
+    
     if interval == '5m' or interval == '15m':
-        start_date = end_date - timedelta(days=1)  # 1 day for minute data
+        start_date = end_date - timedelta(days=1) 
     elif interval == '1h':
-        start_date = end_date - timedelta(days=30)  # 30 days for hourly data
+        start_date = end_date - timedelta(days=30)
     elif interval == '1d':
-        start_date = end_date - timedelta(days=180)  # 6 months for daily data
+        start_date = end_date - timedelta(days=180) 
     else:
-        start_date = end_date - timedelta(days=30)  # Default to 30 days
+        start_date = end_date - timedelta(days=30) 
     
     # Format dates as strings
     start_str = start_date.strftime('%Y-%m-%d')
     end_str = end_date.strftime('%Y-%m-%d')
     
     try:
-        # Use the retry mechanism for downloading data
         data = try_yf_download(pair, interval=interval, start=start_str, end=end_str)
         
         if data is None or data.empty or 'Close' not in data.columns:
             print(f"No data found for {pair} ({interval} interval)")
             return None
             
-        # Timezone handling
         if data.index.tz is None:
             data.index = data.index.tz_localize('UTC').tz_convert('Asia/Kolkata')
         else:
@@ -114,13 +110,11 @@ def get_forex_analysis(interval):
     overbought = []
     
     for pair in FOREX_PAIRS:
-        # Add small random delay to prevent rate limiting
         time.sleep(random.uniform(0.1, 0.3))
         
         data = download_forex_data(pair, interval)
         
         if data is not None and not data.empty and 'Close' in data.columns:
-            # Calculate RSI indicator
             data = calculate_rsi(data)
             
             if not data.empty and 'indication' in data.columns:
@@ -145,18 +139,14 @@ def get_combined_analysis(intervals):
     """
     result = {}
     
-    # Get results for each interval
     for interval in intervals:
         result[interval] = get_forex_analysis(interval)
-    
-    # Calculate combined results (intersection)
+
     if intervals:
-        # Initialize with empty lists in case the first interval has no results
         combined_underbought = set(result[intervals[0]][0]) if result[intervals[0]] and len(result[intervals[0]]) >= 1 else set()
         combined_overbought = set(result[intervals[0]][1]) if result[intervals[0]] and len(result[intervals[0]]) >= 2 else set()
         
         for interval in intervals[1:]:
-            # Safely get results, handling potential missing or incomplete data
             interval_data = result.get(interval, ([], []))
             underbought = set(interval_data[0]) if interval_data and len(interval_data) >= 1 else set()
             overbought = set(interval_data[1]) if interval_data and len(interval_data) >= 2 else set()
