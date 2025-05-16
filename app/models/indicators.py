@@ -6,7 +6,6 @@ def calculate_rsi(data, period=None, overbought=None, underbought=None):
     """
     Calculate RSI (Relative Strength Index) using ta library.
     """
-    # Use default values from config if not provided
     period = period or RSI_PERIOD
     overbought = overbought or RSI_OVERBOUGHT
     underbought = underbought or RSI_UNDERBOUGHT
@@ -18,16 +17,13 @@ def calculate_rsi(data, period=None, overbought=None, underbought=None):
             print("Error: Close price column not found in data")
             return pd.DataFrame()
 
-        # Ensure 'Close' is a 1D Series
         close_series = df['Close']
         if isinstance(close_series, pd.DataFrame):
             close_series = close_series.squeeze()
 
-        # Calculate RSI
         rsi_indicator = RSIIndicator(close=close_series, window=period)
         df['RSI'] = rsi_indicator.rsi()
 
-        # Add RSI signal
         df['indication'] = 'Normal'
         df.loc[df['RSI'] > overbought, 'indication'] = 'Overbought'
         df.loc[df['RSI'] < underbought, 'indication'] = 'Underbought'
